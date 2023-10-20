@@ -23,12 +23,9 @@ pub(crate) fn get_matching_files(settings: &Settings) -> anyhow::Result<()>{
 fn has_correct_extension(entry: &DirEntry, settings: &Settings) -> bool {
     if let Some(ext) = entry.path().extension() {
         if let Ok(lowercase) = ext.to_ascii_lowercase().into_string() {
-            settings.input.file_types.contains(&lowercase)
-        } else {
-            false
-        }
-    } else {
-        false
-    }
+            return settings.input.file_types.contains(&lowercase);
+        } 
+    } 
+    return false
 }
 

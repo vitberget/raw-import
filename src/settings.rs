@@ -1,3 +1,5 @@
+use std::collections::HashSet;
+
 use clap::{Parser, ValueEnum};
 use config::{Config, File, FileFormat, ConfigBuilder};
 use config::builder::DefaultState;
@@ -26,7 +28,7 @@ pub(crate) struct Settings {
 #[derive(Debug)]
 pub(crate) struct InputSettings {
     pub(crate) path: String, 
-    pub(crate) file_types: Vec<String>
+    pub(crate) file_types: HashSet<String>
 }
 
 #[derive(Debug)]
@@ -39,7 +41,7 @@ pub(crate) struct OutputSettings {
 pub(crate) fn get_settings() -> anyhow::Result<Settings> {
     let config = get_config()?;
 
-    let file_types: Vec<String> = config.get_array("input.file_types")?
+    let file_types: HashSet<String> = config.get_array("input.file_types")?
         .iter()
         .map(|value| value.to_string().to_lowercase())
         .collect();
