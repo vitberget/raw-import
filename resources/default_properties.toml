@@ -1,6 +1,6 @@
 [input]
 path = "./"
-filter = ["*.cr3", "*.raf"]
+file_types = ["cr3", "raf"]
 
 [output]
 base = "hello"

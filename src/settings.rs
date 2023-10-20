@@ -26,7 +26,7 @@ pub(crate) struct Settings {
 #[derive(Debug)]
 pub(crate) struct InputSettings {
     pub(crate) path: String, 
-    pub(crate) filter: Vec<String>
+    pub(crate) file_types: Vec<String>
 }
 
 #[derive(Debug)]
@@ -39,15 +39,15 @@ pub(crate) struct OutputSettings {
 pub(crate) fn get_settings() -> anyhow::Result<Settings> {
     let config = get_config()?;
 
-    let filter: Vec<String> = config.get_array("input.filter")?
+    let file_types: Vec<String> = config.get_array("input.file_types")?
         .iter()
-        .map(|value| value.to_string())
+        .map(|value| value.to_string().to_lowercase())
         .collect();
 
     Ok(Settings {
         input: InputSettings { 
             path: config.get_string("input.path")?,
-            filter,
+            file_types,
         },
         output: OutputSettings { 
             base: config.get_string("output.base")?,
