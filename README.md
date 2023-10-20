@@ -8,7 +8,7 @@ Example:
 
 ```toml
 [input]
-path = 'hello'
+path = './'
 filter = ['*.cr3', '*.raf']
 
 [output]
