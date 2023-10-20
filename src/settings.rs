@@ -1,6 +1,21 @@
+use clap::{Parser, ValueEnum};
 use config::{Config, File, FileFormat, ConfigBuilder};
 use config::builder::DefaultState;
 use log::debug;
+
+#[derive(Parser, Debug)]
+#[command(author,version,about)]
+pub(crate) struct RawImportArgs {
+    #[arg(short, long, value_enum, default_value_t = RawImportLogLevel::Info)]
+    pub(crate) verbosity: RawImportLogLevel,
+}
+
+#[derive(ValueEnum,Clone,Debug)]
+pub(crate) enum RawImportLogLevel {
+    Info,
+    Debug,
+    Trace
+}
 
 #[derive(Debug)]
 pub(crate) struct Settings {
