@@ -9,6 +9,7 @@ use crate::settings::Settings;
 pub(crate) struct EntryWithRename {
     pub(crate) entry: DirEntryWithExif,
     pub(crate) new_name: String,
+    pub(crate) path: String,
 }
 
 pub(crate) fn rename_entry(enhanched: Result<DirEntryWithExif, anyhow::Error>, index:usize, settings: &Settings) -> anyhow::Result<EntryWithRename> {
@@ -19,9 +20,18 @@ pub(crate) fn rename_entry(enhanched: Result<DirEntryWithExif, anyhow::Error>, i
 
     let (stem, extension) = get_stem_and_extension(&entry.file_name())?;
 
-    let filename_pattern = &settings.output.filename;
-   
-    let new_name = filename_pattern
+    let new_name = (&settings.output.filename)
+        .replace("{yyyy}", date_time.year.as_str())
+        .replace("{MM}", date_time.month.as_str())
+        .replace("{dd}", date_time.day.as_str())
+        .replace("{HH}", date_time.hour.as_str())
+        .replace("{mm}", date_time.minute.as_str())
+        .replace("{ss}", date_time.second.as_str())
+        .replace("{seq}", format!("{:04}", index).as_str())
+        .replace("{filename}", stem.as_str())
+        .replace("{extension}", extension.as_str()) ;
+
+    let path = (&settings.output.path)
         .replace("{yyyy}", date_time.year.as_str())
         .replace("{MM}", date_time.month.as_str())
         .replace("{dd}", date_time.day.as_str())
@@ -35,6 +45,7 @@ pub(crate) fn rename_entry(enhanched: Result<DirEntryWithExif, anyhow::Error>, i
     Ok(EntryWithRename {
         entry: dewe,
         new_name,
+        path
     })
 
 }
