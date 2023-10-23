@@ -3,14 +3,16 @@ extern crate clap;
 use crate::exif::enhance_with_exif;
 use crate::files::get_matching_files;
 use crate::logging::setup_logging;
+use crate::rename::rename_entry;
 use crate::settings::{RawImportArgs, get_settings};
 use clap::Parser;
-use log::{debug, info};
+use log::{debug, info, trace};
 
 mod settings;
 mod logging;
 mod files;
 mod exif;
+mod rename;
 
 const VERSION: &str = env!("CARGO_PKG_VERSION");
 
@@ -26,9 +28,10 @@ fn main() -> anyhow::Result<()>{
 
     let raw_files = get_matching_files(&settings)?;
     
-    for entry in raw_files {
+    for (index, entry) in raw_files.into_iter().enumerate() {
         let enhanched = enhance_with_exif(entry);
-        println!("{:?}", enhanched);
+        let renamed = rename_entry(enhanched, index, &settings);
+        trace!("renamed   {:?}", renamed);
     }
 
     Ok(())

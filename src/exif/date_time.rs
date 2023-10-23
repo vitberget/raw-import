@@ -3,13 +3,13 @@ use rexiv2::Metadata;
 
 #[derive(Debug, PartialEq)]
 pub(crate) struct ExifDateTime {
-    year: String,
-    month: String,
-    day: String,
+    pub(crate) year: String,
+    pub(crate) month: String,
+    pub(crate) day: String,
 
-    hour: String,
-    minute: String,
-    second: String
+    pub(crate) hour: String,
+    pub(crate) minute: String,
+    pub(crate) second: String
 }
 
 impl TryFrom<String> for ExifDateTime {
