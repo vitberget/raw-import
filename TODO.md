@@ -5,3 +5,4 @@
     - [ ] % indication
     - [ ] Show file copy speed
     - [ ] Estimate time remaining
+- [ ] Select a license
