@@ -66,11 +66,11 @@ fn get_config() -> anyhow::Result<Config> {
         .add_source(File::from_str(
                 include_str!("../resources/default_properties.toml"),
                 FileFormat::Toml));
-    let builder = add_config_file(builder);
+    let builder = add_xdg_config_file(builder);
     Ok(builder.build()?)
 }
 
-fn add_config_file(builder: ConfigBuilder<DefaultState>) -> ConfigBuilder<DefaultState> {
+fn add_xdg_config_file(builder: ConfigBuilder<DefaultState>) -> ConfigBuilder<DefaultState> {
     if let Ok(xdg_dirs) = xdg::BaseDirectories::with_prefix("raw-import") {
         if let Ok(config_path) = xdg_dirs.place_config_file("configuration.toml") {
             if let Some(config_path) = config_path.to_str() {
