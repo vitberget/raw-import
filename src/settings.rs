@@ -1,5 +1,6 @@
 use std::collections::HashSet;
 
+use anyhow::format_err;
 use clap::{Parser, ValueEnum};
 use config::{Config, File, FileFormat, ConfigBuilder};
 use config::builder::DefaultState;
@@ -36,8 +37,31 @@ pub(crate) struct OutputSettings {
     pub(crate) base: String, 
     pub(crate) path: String, 
     pub(crate) filename: String, 
-    pub(crate) overwrite: bool,
+    pub(crate) duplicates: DuplicateAction,
 }
+
+#[derive(Debug)]
+pub(crate) enum DuplicateAction {
+    Ignore,
+    AlterName,
+    Overwrite
+}
+
+impl TryFrom<String> for DuplicateAction {
+    type Error = anyhow::Error;
+
+    fn try_from(value: String) -> Result<Self, Self::Error> {
+        match value.to_lowercase().as_str() {
+            "ignore" => Ok(Self::Ignore),
+            "alter_name" => Ok(Self::AlterName),
+            "altername" => Ok(Self::AlterName),
+            "overwrite" => Ok(Self::Overwrite),
+
+            bad_value => Err(format_err!("Could not parse {bad_value} into an DuplicateAction"))
+        }
+    }
+}
+
 
 pub(crate) fn get_settings() -> anyhow::Result<Settings> {
     let config = get_config()?;
@@ -56,7 +80,7 @@ pub(crate) fn get_settings() -> anyhow::Result<Settings> {
             base: config.get_string("output.base")?,
             path: config.get_string("output.path")?,
             filename: config.get_string("output.filename")?,
-            overwrite: config.get_bool("output.overwrite")?,
+            duplicates: config.get_string("output.duplicates")?.try_into()?,
         }
     })
 }
