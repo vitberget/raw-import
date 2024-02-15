@@ -27,12 +27,12 @@ fn main() -> anyhow::Result<()>{
     debug!("Running with settings {:?}", settings);
 
     let raw_files = get_matching_files(&settings)?;
-    
-    for (index, entry) in raw_files.into_iter().enumerate() {
-        let enhanched = enhance_with_exif(entry);
-        let renamed = rename_entry(enhanched, index, &settings);
-        trace!("renamed   {:?}", renamed);
-    }
+
+    raw_files.into_iter()
+        .map(|entry| enhance_with_exif(entry))
+        .enumerate()
+        .map(|(index, enhanched)| rename_entry(enhanched, index, &settings))
+        .for_each(|renamed| { trace!("Renamed: {:?}", renamed) });
 
     Ok(())
 }
