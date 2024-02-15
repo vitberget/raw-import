@@ -36,6 +36,7 @@ pub(crate) struct OutputSettings {
     pub(crate) base: String, 
     pub(crate) path: String, 
     pub(crate) filename: String, 
+    pub(crate) overwrite: bool,
 }
 
 pub(crate) fn get_settings() -> anyhow::Result<Settings> {
@@ -55,6 +56,7 @@ pub(crate) fn get_settings() -> anyhow::Result<Settings> {
             base: config.get_string("output.base")?,
             path: config.get_string("output.path")?,
             filename: config.get_string("output.filename")?,
+            overwrite: config.get_bool("output.overwrite")?,
         }
     })
 }
