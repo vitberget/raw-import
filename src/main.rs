@@ -3,7 +3,7 @@ extern crate clap;
 use crate::exif::enhance_with_exif;
 use crate::files::get_matching_files;
 use crate::logging::setup_logging;
-use crate::rename::rename_entry;
+use crate::rename::{rename_entry, EntryWithRename};
 use crate::settings::{RawImportArgs, get_settings};
 use clap::Parser;
 use log::{debug, info, trace};
@@ -28,11 +28,18 @@ fn main() -> anyhow::Result<()>{
 
     let raw_files = get_matching_files(&settings)?;
 
-    raw_files.into_iter()
+    let files: Vec<EntryWithRename> = raw_files.into_iter()
         .map(|entry| enhance_with_exif(entry))
         .enumerate()
         .map(|(index, enhanched)| rename_entry(enhanched, index, &settings))
-        .for_each(|renamed| { trace!("Renamed: {:?}", renamed) });
+        .filter(|entry| entry.is_ok())
+        .map(|entry| entry.unwrap())
+        .collect();
+
+    let total_file_count: usize = files.len();
+    let total_file_size: u64 = files.iter().map(|entry| entry.entry.size).sum();
+
+    debug!("total count {total_file_count}, size {total_file_size}");
 
     Ok(())
 }
