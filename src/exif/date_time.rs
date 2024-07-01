@@ -12,6 +12,32 @@ pub(crate) struct ExifDateTime {
     pub(crate) second: String
 }
 
+impl PartialOrd for ExifDateTime {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        match self.year.partial_cmp(&other.year) {
+            Some(core::cmp::Ordering::Equal) => {}
+            ord => return ord,
+        }
+        match self.month.partial_cmp(&other.month) {
+            Some(core::cmp::Ordering::Equal) => {}
+            ord => return ord,
+        }
+        match self.day.partial_cmp(&other.day) {
+            Some(core::cmp::Ordering::Equal) => {}
+            ord => return ord,
+        }
+        match self.hour.partial_cmp(&other.hour) {
+            Some(core::cmp::Ordering::Equal) => {}
+            ord => return ord,
+        }
+        match self.minute.partial_cmp(&other.minute) {
+            Some(core::cmp::Ordering::Equal) => {}
+            ord => return ord,
+        }
+        self.second.partial_cmp(&other.second)
+    }
+}
+
 impl TryFrom<String> for ExifDateTime {
     type Error = anyhow::Error;
 

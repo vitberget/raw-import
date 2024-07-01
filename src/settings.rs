@@ -11,6 +11,9 @@ use log::debug;
 pub(crate) struct RawImportArgs {
     #[arg(short, long, value_enum, default_value_t = RawImportLogLevel::Info)]
     pub(crate) verbosity: RawImportLogLevel,
+
+    #[arg(short, long)]
+    pub(crate) dry_run: Option<bool>,
 }
 
 #[derive(ValueEnum,Clone,Debug)]
@@ -34,7 +37,6 @@ pub(crate) struct InputSettings {
 
 #[derive(Debug)]
 pub(crate) struct OutputSettings {
-    pub(crate) base: String, 
     pub(crate) path: String, 
     pub(crate) filename: String, 
     pub(crate) duplicates: DuplicateAction,
@@ -77,7 +79,6 @@ pub(crate) fn get_settings() -> anyhow::Result<Settings> {
             file_types,
         },
         output: OutputSettings { 
-            base: config.get_string("output.base")?,
             path: config.get_string("output.path")?,
             filename: config.get_string("output.filename")?,
             duplicates: config.get_string("output.duplicates")?.try_into()?,

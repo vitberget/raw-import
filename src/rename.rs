@@ -1,4 +1,5 @@
-use std::{path::Path, ffi::OsString};
+use std::ffi::OsString;
+use std::path::Path;
 
 use anyhow::{bail, Context};
 
@@ -12,15 +13,14 @@ pub(crate) struct EntryWithRename {
     pub(crate) path: String,
 }
 
-pub(crate) fn rename_entry(enhanched: Result<DirEntryWithExif, anyhow::Error>, index:usize, settings: &Settings) -> anyhow::Result<EntryWithRename> {
-    let dewe = enhanched?;
-    let entry = &dewe.entry;
-    let date_time = &dewe.date_time;
+pub(crate) fn rename_entry(enhanched: DirEntryWithExif, index:usize, settings: &Settings) -> anyhow::Result<EntryWithRename> {
+    let entry = &enhanched.entry;
+    let date_time = &enhanched.date_time;
 
 
     let (stem, extension) = get_stem_and_extension(&entry.file_name())?;
 
-    let new_name = (&settings.output.filename)
+    let new_name = settings.output.filename
         .replace("{yyyy}", date_time.year.as_str())
         .replace("{MM}", date_time.month.as_str())
         .replace("{dd}", date_time.day.as_str())
@@ -31,7 +31,7 @@ pub(crate) fn rename_entry(enhanched: Result<DirEntryWithExif, anyhow::Error>, i
         .replace("{filename}", stem.as_str())
         .replace("{extension}", extension.as_str()) ;
 
-    let path = (&settings.output.path)
+    let path = settings.output.path
         .replace("{yyyy}", date_time.year.as_str())
         .replace("{MM}", date_time.month.as_str())
         .replace("{dd}", date_time.day.as_str())
@@ -43,7 +43,7 @@ pub(crate) fn rename_entry(enhanched: Result<DirEntryWithExif, anyhow::Error>, i
         .replace("{extension}", extension.as_str()) ;
 
     Ok(EntryWithRename {
-        entry: dewe,
+        entry: enhanched,
         new_name,
         path
     })
