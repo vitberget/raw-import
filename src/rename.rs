@@ -11,6 +11,7 @@ pub(crate) struct EntryWithRename {
     pub(crate) entry: DirEntryWithExif,
     pub(crate) new_name: String,
     pub(crate) path: String,
+    pub(crate) index: usize,
 }
 
 pub(crate) fn rename_entry(enhanched: DirEntryWithExif, index:usize, settings: &Settings) -> anyhow::Result<EntryWithRename> {
@@ -45,7 +46,8 @@ pub(crate) fn rename_entry(enhanched: DirEntryWithExif, index:usize, settings: &
     Ok(EntryWithRename {
         entry: enhanched,
         new_name,
-        path
+        path,
+        index
     })
 
 }

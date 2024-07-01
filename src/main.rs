@@ -48,7 +48,7 @@ fn main() -> anyhow::Result<()>{
 
     create_target_paths(target_paths, &args)?;
 
-    files.iter().for_each(|entry| { copy_file(entry, &settings, &args); });
+    files.iter().for_each(|entry| { copy_file(entry, &settings, &args, &total_file_count); });
 
     Ok(())
 }

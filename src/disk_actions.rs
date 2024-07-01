@@ -28,9 +28,17 @@ pub(crate) fn create_target_paths(target_paths: Vec<&String>, args: &RawImportAr
     Ok(())
 }
 
-pub(crate) fn copy_file(entry: &EntryWithRename, settings: &Settings, args: &RawImportArgs) {
+pub(crate) fn copy_file(entry: &EntryWithRename, settings: &Settings, args: &RawImportArgs, total_file_count: &usize) {
     let source_file = entry.entry.entry.path();
-    info!("Copying: {} -> {}/{}", source_file.to_str().unwrap(), entry.path, entry.new_name);
+    let percentage = (100_f32 * entry.index as f32) / *total_file_count as f32;
+    info!("Copying: {} -> {}/{}    ({}/{}  {:.1}%)", 
+        source_file.to_str().unwrap(), 
+        entry.path, 
+        entry.new_name,
+        entry.index +1,
+        total_file_count,
+        percentage
+        );
     let dir = Path::new(&entry.path);
     let target_file = dir.join(Path::new(&entry.new_name));
     match (target_file.exists(), &settings.output.duplicates)  {
