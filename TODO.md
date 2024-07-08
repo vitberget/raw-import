@@ -2,6 +2,7 @@
 
 - [ ] Add some instructions for normie users.
 - [ ] Progress
+    - [ ] Test `crossterm`
     - [ ] % indication
     - [ ] Show file copy speed
     - [ ] Estimate time remaining
