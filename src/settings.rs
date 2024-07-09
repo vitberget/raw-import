@@ -15,7 +15,7 @@ use log::{debug, info};
 /// Source will be available at: https://github.com/vitberget/raw-importer
 pub(crate) struct RawImportArgs {
     #[command(subcommand)]
-    pub(crate) command: RawImportCommand,
+    pub(crate) command: Option<RawImportCommand>,
 
     #[arg(short, long, value_enum, default_value_t = RawImportLogLevel::Info)]
     pub(crate) verbosity: RawImportLogLevel,
@@ -27,7 +27,10 @@ pub(crate) struct RawImportArgs {
 #[derive(Subcommand, Debug, Default)]
 pub(crate) enum RawImportCommand {
     #[default]
+    /// Import raw files
     Import,
+
+    /// Show information about configuration from all sources
     ShowConfiguration
 }
 

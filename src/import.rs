@@ -1,3 +1,4 @@
+use anyhow::bail;
 use log::debug;
 
 use crate::disk_actions::{copy_file, create_target_paths};
@@ -7,6 +8,7 @@ use crate::rename::{rename_entry, EntryWithRename};
 use crate::settings::{RawImportArgs, Settings};
 
 pub(crate) fn import_files(args: &RawImportArgs, settings: &Settings) -> anyhow::Result<()> {
+    rexiv2::initialize()?;
     debug!("Running with settings {:?}", settings);
 
     let mut raw_files: Vec<DirEntryWithExif> = get_matching_files(settings)?.into_iter()
@@ -22,6 +24,8 @@ pub(crate) fn import_files(args: &RawImportArgs, settings: &Settings) -> anyhow:
 
     let total_file_count: usize = files.len();
     let total_file_size: u64 = files.iter().map(|entry| entry.entry.size).sum();
+
+    if total_file_count == 0 { bail!("No files to be imported found"); } 
 
     debug!("total count {total_file_count}, size {total_file_size}");
 

@@ -20,15 +20,13 @@ const VERSION: &str = env!("CARGO_PKG_VERSION");
 fn main() -> anyhow::Result<()>{
     let args = RawImportArgs::parse();
     let _log_guard = setup_logging(&args);
-    rexiv2::initialize()?;
 
     info!("RAW importer v{VERSION}");
 
     let settings = get_settings()?;
     
     match args.command {
-        RawImportCommand::Import => import_files(&args, &settings),
-        RawImportCommand::ShowConfiguration => show_config(&args, &settings),
+        None | Some(RawImportCommand::Import) => import_files(&args, &settings),
+        Some(RawImportCommand::ShowConfiguration) => show_config(&args, &settings),
     }
 }
-
