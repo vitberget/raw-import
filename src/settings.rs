@@ -1,19 +1,34 @@
 use std::collections::HashSet;
+use std::fs;
 
 use anyhow::format_err;
-use clap::{Parser, ValueEnum};
+use clap::{Parser, Subcommand, ValueEnum};
 use config::{Config, File, FileFormat, ConfigBuilder};
 use config::builder::DefaultState;
-use log::debug;
+use log::{debug, info};
 
 #[derive(Parser, Debug)]
-#[command(author,version,about)]
+#[command(author, version, about)]
+/// Utility to import raw files from one location, such as a memory card, 
+/// to another location, such as a hdd/sdd.
+///
+/// Source will be available at: https://github.com/vitberget/raw-importer
 pub(crate) struct RawImportArgs {
+    #[command(subcommand)]
+    pub(crate) command: RawImportCommand,
+
     #[arg(short, long, value_enum, default_value_t = RawImportLogLevel::Info)]
     pub(crate) verbosity: RawImportLogLevel,
 
     #[arg(short, long)]
     pub(crate) dry_run: Option<bool>,
+}
+
+#[derive(Subcommand, Debug, Default)]
+pub(crate) enum RawImportCommand {
+    #[default]
+    Import,
+    ShowConfiguration
 }
 
 #[derive(ValueEnum,Clone,Debug)]
@@ -104,5 +119,39 @@ fn add_xdg_config_file(builder: ConfigBuilder<DefaultState>) -> ConfigBuilder<De
             }
         }
     }
-    return builder
+    builder
+}
+
+fn get_xdg_config_file_content() -> Option<(String, String)> {
+    if let Ok(xdg_dirs) = xdg::BaseDirectories::with_prefix("raw-import") {
+        if let Ok(config_path) = xdg_dirs.place_config_file("configuration.toml") {
+            if let Some(config_filename) = config_path.to_str() {
+                let content = match fs::read_to_string(&config_path) {
+                    Ok(content) => content,
+                    Err(error) => format!("{}", error).to_string()
+                };
+                return Some((config_filename.to_string(), content));
+            }
+        }
+    }
+    None
+}
+
+pub(crate) fn show_config(_args: &RawImportArgs, settings: &Settings) -> anyhow::Result<()> {
+    info!("Running with settings:");
+    info!("{:?}", settings);
+    info!("");
+    info!("=== Default settings ===");
+    info!("{}", include_str!("../resources/default_properties.toml"));
+    info!("");
+
+    match get_xdg_config_file_content() {
+        Some((file_path, file_content)) => {
+            info!("=== XDG Config settings from {file_path} ===");
+            info!("{file_content}");
+        },
+        None => info!("=== No XDG Config settings ===")
+    }
+
+    Ok(())
 }
