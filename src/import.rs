@@ -7,11 +7,11 @@ use crate::files::get_matching_files;
 use crate::rename::{rename_entry, EntryWithRename};
 use crate::settings::{RawImportArgs, Settings};
 
-pub(crate) fn import_files(args: &RawImportArgs, settings: &Settings) -> anyhow::Result<()> {
+pub(crate) fn import_files(from_path: Option<String>, args: &RawImportArgs, settings: &Settings) -> anyhow::Result<()> {
     rexiv2::initialize()?;
     debug!("Running with settings {:?}", settings);
 
-    let mut raw_files: Vec<DirEntryWithExif> = get_matching_files(settings)?.into_iter()
+    let mut raw_files: Vec<DirEntryWithExif> = get_matching_files(from_path, settings)?.into_iter()
         .filter_map(|entry| enhance_with_exif(entry).ok())
         .collect();
 

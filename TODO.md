@@ -1,6 +1,7 @@
 # TODO in raw-importer
 
-- [ ] Add some instructions for normie users.
+- [ ] Add some instructions for normie users
+- [ ] Good error messages for the most common stuff
 - [ ] Progress
     - [ ] Test `crossterm`
     - [ ] % indication
@@ -12,4 +13,3 @@
     - [ ] Mount
     - [ ] Umount
     - [ ] Message
-

@@ -24,14 +24,19 @@ pub(crate) struct RawImportArgs {
     pub(crate) dry_run: Option<bool>,
 }
 
-#[derive(Subcommand, Debug, Default)]
+#[derive(Subcommand, Debug)]
 pub(crate) enum RawImportCommand {
-    #[default]
     /// Import raw files
-    Import,
+    Import {  
+        #[arg(short, long)]
+        from_path: Option<String> 
+    },
 
     /// Show information about configuration from all sources
-    ShowConfiguration
+    ShowConfiguration,
+
+    /// Show default configuration
+    DefaultConfiguration
 }
 
 #[derive(ValueEnum,Clone,Debug)]
@@ -140,7 +145,7 @@ fn get_xdg_config_file_content() -> Option<(String, String)> {
     None
 }
 
-pub(crate) fn show_config(_args: &RawImportArgs, settings: &Settings) -> anyhow::Result<()> {
+pub(crate) fn show_config(settings: &Settings) -> anyhow::Result<()> {
     info!("Running with settings:");
     info!("{:?}", settings);
     info!("");
@@ -156,5 +161,11 @@ pub(crate) fn show_config(_args: &RawImportArgs, settings: &Settings) -> anyhow:
         None => info!("=== No XDG Config settings ===")
     }
 
+    Ok(())
+}
+
+pub(crate) fn show_default_config() -> anyhow::Result<()> {
+    debug!("Default configuration is:");
+    info!("{}", include_str!("../resources/default_properties.toml"));
     Ok(())
 }

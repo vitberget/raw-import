@@ -2,8 +2,13 @@ use std::fs::{self, DirEntry};
 
 use crate::settings::Settings;
 
-pub(crate) fn get_matching_files(settings: &Settings) -> anyhow::Result<Vec<DirEntry>>{
-    let raw_files: Vec<DirEntry> = fs::read_dir(&settings.input.path)?
+pub(crate) fn get_matching_files(from_path: Option<String>, settings: &Settings) -> anyhow::Result<Vec<DirEntry>>{
+    let files = match from_path {
+        Some(path) => fs::read_dir(path)?,
+        None => fs::read_dir(&settings.input.path)?
+    };
+
+    let raw_files: Vec<DirEntry> = files
         .filter(|entry| entry.is_ok())
         .map(|entry| entry.unwrap())
         .filter(|entry| has_correct_extension(entry, settings))

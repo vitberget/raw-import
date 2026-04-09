@@ -1,11 +1,9 @@
-extern crate clap;
-
 use clap::Parser;
-use log:: info;
+use log::info;
 
 use crate::import::import_files;
 use crate::logging::setup_logging;
-use crate::settings::{get_settings, show_config, RawImportArgs, RawImportCommand};
+use crate::settings::{RawImportArgs, RawImportCommand, get_settings, show_config, show_default_config};
 
 mod disk_actions;
 mod exif;
@@ -26,7 +24,9 @@ fn main() -> anyhow::Result<()>{
     let settings = get_settings()?;
     
     match args.command {
-        None | Some(RawImportCommand::Import) => import_files(&args, &settings),
-        Some(RawImportCommand::ShowConfiguration) => show_config(&args, &settings),
+        None => import_files(None, &args, &settings),
+        Some(RawImportCommand::Import { ref from_path }) => import_files(from_path.clone(), &args, &settings),
+        Some(RawImportCommand::ShowConfiguration) => show_config(&settings),
+        Some(RawImportCommand::DefaultConfiguration) => show_default_config()
     }
 }
