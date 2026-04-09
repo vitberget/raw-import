@@ -1,16 +1,16 @@
 [package]
 name = "raw-import"
-version = "0.1.0"
-edition = "2021"
+version = "0.1.1"
+edition = "2024"
 authors = [
     "Kenneth Hedman <raw-import@vitberget.se>"
 ]
 
 [dependencies]
-anyhow = "1.0.75"
-clap = { version = "4.4.6", features = ["derive"] }
-config = "0.13.3"
-log = "0.4.20"
-log4rs = "1.2.0"
+anyhow = "1.0.102"
+clap = { version = "4.6.0", features = ["derive"] }
+config = "0.15.22"
+log = "0.4.29"
+log4rs = "1.4.0"
 rexiv2 = { version = "0.10.0", features = ["raw-tag-access"] }
-xdg = "2.5.2"
+xdg = "3.0.0"

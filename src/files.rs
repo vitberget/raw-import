@@ -17,11 +17,10 @@ pub(crate) fn get_matching_files(from_path: Option<String>, settings: &Settings)
 }
 
 fn has_correct_extension(entry: &DirEntry, settings: &Settings) -> bool {
-    if let Some(ext) = entry.path().extension() {
-        if let Ok(lowercase) = ext.to_ascii_lowercase().into_string() {
+    if let Some(ext) = entry.path().extension()
+        && let Ok(lowercase) = ext.to_ascii_lowercase().into_string() {
             return settings.input.file_types.contains(&lowercase);
         } 
-    } 
     false
 }
 

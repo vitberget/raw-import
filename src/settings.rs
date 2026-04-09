@@ -112,35 +112,30 @@ pub(crate) fn get_settings() -> anyhow::Result<Settings> {
 fn get_config() -> anyhow::Result<Config> {
     let builder = Config::builder()
         .add_source(File::from_str(
-                include_str!("../resources/default_properties.toml"),
-                FileFormat::Toml));
-    let builder = add_xdg_config_file(builder);
-    Ok(builder.build()?)
+            include_str!("../resources/default_properties.toml"),
+            FileFormat::Toml));
+    Ok(add_xdg_config_file(builder).build()?)
 }
 
 fn add_xdg_config_file(builder: ConfigBuilder<DefaultState>) -> ConfigBuilder<DefaultState> {
-    if let Ok(xdg_dirs) = xdg::BaseDirectories::with_prefix("raw-import") {
-        if let Ok(config_path) = xdg_dirs.place_config_file("configuration.toml") {
-            if let Some(config_path) = config_path.to_str() {
-                debug!("Adding config file {config_path}");
-                return builder.add_source(File::with_name(config_path).required(false));
-            }
-        }
+    let xdg_dirs = xdg::BaseDirectories::with_prefix("raw-import");
+    if let Ok(config_path) = xdg_dirs.place_config_file("configuration.toml")
+    && let Some(config_path) = config_path.to_str() {
+        debug!("Adding config file {config_path}");
+        return builder.add_source(File::with_name(config_path).required(false));
     }
     builder
 }
 
 fn get_xdg_config_file_content() -> Option<(String, String)> {
-    if let Ok(xdg_dirs) = xdg::BaseDirectories::with_prefix("raw-import") {
-        if let Ok(config_path) = xdg_dirs.place_config_file("configuration.toml") {
-            if let Some(config_filename) = config_path.to_str() {
-                let content = match fs::read_to_string(&config_path) {
-                    Ok(content) => content,
-                    Err(error) => format!("{}", error).to_string()
-                };
-                return Some((config_filename.to_string(), content));
-            }
-        }
+    let xdg_dirs = xdg::BaseDirectories::with_prefix("raw-import");
+    if let Ok(config_path) = xdg_dirs.place_config_file("configuration.toml")
+    && let Some(config_filename) = config_path.to_str() {
+        let content = match fs::read_to_string(&config_path) {
+            Ok(content) => content,
+            Err(error) => format!("{}", error).to_string()
+        };
+        return Some((config_filename.to_string(), content));
     }
     None
 }
@@ -149,8 +144,7 @@ pub(crate) fn show_config(settings: &Settings) -> anyhow::Result<()> {
     info!("Running with settings:");
     info!("{:?}", settings);
     info!("");
-    info!("=== Default settings ===");
-    info!("{}", include_str!("../resources/default_properties.toml"));
+    show_default_config()?;
     info!("");
 
     match get_xdg_config_file_content() {
@@ -165,7 +159,7 @@ pub(crate) fn show_config(settings: &Settings) -> anyhow::Result<()> {
 }
 
 pub(crate) fn show_default_config() -> anyhow::Result<()> {
-    debug!("Default configuration is:");
+    info!("=== Default settings ===");
     info!("{}", include_str!("../resources/default_properties.toml"));
     Ok(())
 }

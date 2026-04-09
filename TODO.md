@@ -2,6 +2,7 @@
 
 - [ ] Add some instructions for normie users
 - [ ] Good error messages for the most common stuff
+- [ ] Add color to output
 - [ ] Progress
     - [ ] Test `crossterm`
     - [ ] % indication
