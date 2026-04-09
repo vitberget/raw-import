@@ -9,8 +9,7 @@ pub(crate) fn get_matching_files(from_path: Option<String>, settings: &Settings)
     };
 
     let raw_files: Vec<DirEntry> = files
-        .filter(|entry| entry.is_ok())
-        .map(|entry| entry.unwrap())
+        .flatten()
         .filter(|entry| has_correct_extension(entry, settings))
         .collect();
 
@@ -23,6 +22,6 @@ fn has_correct_extension(entry: &DirEntry, settings: &Settings) -> bool {
             return settings.input.file_types.contains(&lowercase);
         } 
     } 
-    return false
+    false
 }
 
