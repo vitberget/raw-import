@@ -1,4 +1,4 @@
-use anyhow::bail;
+use anyhow::ensure;
 use log::debug;
 
 use crate::disk_actions::{copy_file, create_target_paths};
@@ -19,15 +19,15 @@ pub(crate) fn import_files(from_path: Option<String>, args: &RawImportArgs, sett
 
     let files: Vec<EntryWithRename> = raw_files.into_iter()
         .enumerate()
-        .filter_map(|(index, enhanched)| rename_entry(enhanched, index, settings).ok())
+        .filter_map(|(index, enhanched)| rename_entry(enhanched, index + 1, settings).ok())
         .collect();
 
     let total_file_count: usize = files.len();
     let total_file_size: u64 = files.iter().map(|entry| entry.entry.size).sum();
 
-    if total_file_count == 0 { bail!("No files to be imported found"); } 
-
     debug!("total count {total_file_count}, size {total_file_size}");
+
+    ensure!(total_file_count > 0, "No files to be imported found");
 
     let target_paths: Vec<&String> = files.iter().map(|entry| &entry.path).collect();
 

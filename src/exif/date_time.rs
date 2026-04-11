@@ -1,4 +1,4 @@
-use anyhow::{bail, Context};
+use anyhow::{Context, ensure};
 use rexiv2::Metadata;
 
 #[derive(Debug, PartialEq)]
@@ -51,9 +51,7 @@ impl TryFrom<String> for ExifDateTime {
         let minute: String = items.next().context("Did not have minute")?.to_string();
         let second: String = items.next().context("Did not have second")?.to_string();
 
-        if items.next().is_some() {
-            bail!("To many elements");
-        }
+        ensure!(items.next().is_none(), "To many elements");
 
         Ok(ExifDateTime {
             year,
@@ -90,4 +88,3 @@ mod tests {
         Ok(())
     }
 }
-
