@@ -55,7 +55,8 @@ pub(crate) struct Settings {
 #[derive(Debug)]
 pub(crate) struct InputSettings {
     pub(crate) path: String, 
-    pub(crate) file_types: HashSet<String>
+    pub(crate) file_types: HashSet<String>,
+    pub(crate) recursive: bool
 }
 
 #[derive(Debug)]
@@ -100,6 +101,7 @@ pub(crate) fn get_settings() -> anyhow::Result<Settings> {
         input: InputSettings { 
             path: config.get_string("input.path")?,
             file_types,
+            recursive: config.get_bool("input.recursive")?,
         },
         output: OutputSettings { 
             path: config.get_string("output.path")?,

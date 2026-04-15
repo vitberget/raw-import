@@ -18,6 +18,7 @@ pub(crate) fn create_target_paths(target_paths: Vec<&String>, args: &RawImportAr
         }
         if !target_dir_path.exists() {
             info!("Creating target directory {str}");
+
             if args.dry_run == Some(true) {
                 info!("  Dry run, no action");
             } else {
@@ -35,7 +36,7 @@ pub(crate) fn copy_file(entry: &EntryWithRename, settings: &Settings, args: &Raw
         source_file.to_str().unwrap(), 
         entry.path, 
         entry.new_name,
-        entry.index +1,
+        entry.index,
         total_file_count,
         percentage
         );
@@ -61,5 +62,3 @@ fn actually_copy_file(source_file: PathBuf, target_file: PathBuf, args: &RawImpo
         info!("  Error: {}", error);
     }
 }
-
-
