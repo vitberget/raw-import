@@ -1278,6 +1278,7 @@ dependencies = [
  "anyhow",
  "clap",
  "config",
+ "futures-lite",
  "log",
  "log4rs",
  "rexiv2",

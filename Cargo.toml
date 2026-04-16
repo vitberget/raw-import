@@ -10,6 +10,7 @@ authors = [
 anyhow = "1.0.102"
 clap = { version = "4.6.0", features = ["derive"] }
 config = "0.15.22"
+futures-lite = "2.6.1"
 log = "0.4.29"
 log4rs = "1.4.0"
 rexiv2 = { version = "0.10.0", features = ["raw-tag-access"] }

@@ -1,4 +1,3 @@
-use anyhow::bail;
 use clap::Parser;
 use log::info;
 
@@ -13,6 +12,7 @@ mod import;
 mod logging;
 mod rename;
 mod settings;
+mod udisks2;
 
 const VERSION: &str = env!("CARGO_PKG_VERSION");
 
@@ -22,8 +22,6 @@ async fn main() -> anyhow::Result<()>{
     let _log_guard = setup_logging(&args);
 
     info!("RAW importer v{VERSION}");
-
-    // play_udisk2("sdc").await?;
 
     let settings = get_settings()?;
 
@@ -35,21 +33,3 @@ async fn main() -> anyhow::Result<()>{
     }
 }
 
-async fn play_udisk2(device: &str) -> anyhow::Result<()> {
-    let client = udisks2::Client::new().await?;
-    let object = client
-        .object(format!("/org/freedesktop/UDisks2/block_devices/{device}"))
-        .expect("No {device} device found");
-
-    info!("obj {object:?}");
-    info!("");
-    let block = object.block().await?;
-    info!("x {block:?}");
-    info!("");
-    
-    let dfb = client.drive_for_block(&block).await?;
-    info!("dfb {dfb:?}");
-    info!("");
-
-    bail!("not so fast there now");
-}
