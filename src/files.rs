@@ -11,7 +11,7 @@ pub(crate) fn get_matching_files(from_path: Option<String>, settings: &Settings)
 
     let the_path = Path::new(&text);
 
-    get_matching_files_from_path(&the_path, settings)
+    get_matching_files_from_path(the_path, settings)
 }
 
 fn get_matching_files_from_path(from_path: &Path, settings: &Settings) -> anyhow::Result<Vec<DirEntry>>{

@@ -25,7 +25,7 @@ pub async fn get_partitions(device: &str) -> anyhow::Result<Vec<String>> {
         .partition_table().await.context("Failed to get partition_table for {device}")?
         .partitions().await.context("Failed to get partitions for {device}")?;
 
-    Ok(partitions.iter().map(|owned| owned.to_string()).collect())
+    Ok(partitions.iter().map(|p| p.to_string()).collect())
 }
 
 /// Returns something like "/org/freedesktop/UDisks2/block_devices/sda"
@@ -34,10 +34,12 @@ pub async fn wait_for_device() -> anyhow::Result<String> {
         .object_manager()
         .receive_interfaces_added().await?;
 
-    // ASCII for "/org/freedesktop/UDisks2/block_devices/"
     const BLOCK_DEVICE: [u8; 39] = [
-        47, 111, 114, 103, 47, 102, 114, 101, 101, 100, 101, 115, 107, 116, 111, 112, 47, 85, 68, 105, 115, 107, 115, 
-        50, 47, 98, 108, 111, 99, 107, 95, 100, 101, 118, 105, 99, 101, 115, 47];
+        // ASCII for "/org/freedesktop/UDisks2/block_devices/"
+        b'/', b'o', b'r', b'g', b'/', b'f', b'r', b'e', b'e', b'd', b'e', b's', b'k', b't', b'o', b'p', b'/', 
+        b'U', b'D', b'i', b's', b'k', b's', b'2', b'/', b'b', b'l', b'o', b'c', b'k', b'_', b'd', b'e', b'v', 
+        b'i', b'c', b'e', b's', b'/'
+    ];
 
     loop { 
         if let Some(interface_added) = stream.next().await {
@@ -47,15 +49,15 @@ pub async fn wait_for_device() -> anyhow::Result<String> {
             for i in 0..=max {
                 let delta_data = &data[i..];
 
-                let same = delta_data.iter()
+                let matches_block_device_text = delta_data.iter()
                     .zip(BLOCK_DEVICE)
                     .find(|(left, right)| *left != right)
                     .is_none();
 
-                if same {
+                if matches_block_device_text {
                     let result: Vec<u8> = delta_data.iter()
                         .take_while(|a_byte| **a_byte != 0)
-                        .map(|a_byte| *a_byte)
+                        .copied()
                         .collect();
 
                     if let Some(character) = result.last() && !is_digit(character) {
