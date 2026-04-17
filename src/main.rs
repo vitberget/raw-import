@@ -1,7 +1,7 @@
 use clap::Parser;
 use log::info;
 
-use crate::import::import_files;
+use crate::import::{import_files, wait_and_import};
 use crate::logging::setup_logging;
 use crate::settings::{RawImportArgs, RawImportCommand, get_settings, show_config, show_default_config};
 
@@ -28,6 +28,7 @@ async fn main() -> anyhow::Result<()>{
     match args.command {
         None => import_files(None, &args, &settings),
         Some(RawImportCommand::Import { ref from_path }) => import_files(from_path.clone(), &args, &settings),
+        Some(RawImportCommand::WaitForDevice) => wait_and_import(&args, &settings).await,
         Some(RawImportCommand::ShowConfiguration) => show_config(&settings),
         Some(RawImportCommand::DefaultConfiguration) => show_default_config()
     }

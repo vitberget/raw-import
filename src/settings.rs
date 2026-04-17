@@ -36,7 +36,10 @@ pub(crate) enum RawImportCommand {
     ShowConfiguration,
 
     /// Show default configuration
-    DefaultConfiguration
+    DefaultConfiguration,
+
+    /// Wait for device being inserted, mount, import, unmount, repeat
+    WaitForDevice
 }
 
 #[derive(ValueEnum,Clone,Debug)]
