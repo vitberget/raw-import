@@ -1,30 +1,34 @@
 use std::collections::HashMap;
 
-use anyhow::bail;
+use anyhow::{Context, bail};
 use futures_lite::StreamExt;
 
 pub async fn mount(device: &str) -> anyhow::Result<String> {
     let client = udisks2::Client::new().await?;
 
-    let object = client
-        .object(format!("/org/freedesktop/UDisks2/block_devices/{device}"))
-        .expect("No {device} device found");
+    let object = client.object(device).context("No {device} device found")?;
     let filesystem = object.filesystem().await?;
-    let options = HashMap::new();
-    let mount = filesystem.mount(options).await?;
+    let mount = filesystem.mount(HashMap::new()).await?;
     Ok(mount)
 }
 
 pub async fn unmount(device: &str) -> anyhow::Result<()> {
     let client = udisks2::Client::new().await?;
 
-    let object = client
-        .object(format!("/org/freedesktop/UDisks2/block_devices/{device}"))
-        .expect("No {device} device found");
+    let object = client.object(device).context("No {device} device found")?;
     let filesystem = object.filesystem().await?;
-    let options = HashMap::new();
-    let unmount = filesystem.unmount(options).await?;
+    filesystem.unmount(HashMap::new()).await?;
     Ok(())
+}
+
+pub async fn get_partitions(device: &str) -> anyhow::Result<Vec<String>> {
+    let client = udisks2::Client::new().await?;
+    let object = client.object(device).context("No {device} device found")?;
+    
+    let proxy = object.partition_table().await.context("Failed to get partition_table")?;
+    let partitions = proxy.partitions().await.context("Faile to get partitions")?;
+
+    Ok(partitions.iter().map(|owned| owned.to_string()).collect())
 }
 
 /// Returns something like "/org/freedesktop/UDisks2/block_devices/sda"
@@ -40,7 +44,7 @@ pub async fn wait_for_device() -> anyhow::Result<String> {
             let data = interface_added.message().data().bytes();
             let max = data.len() - BLOCK_DEVICE.len();
 
-            'outer: for i in 0..=max {
+            for i in 0..=max {
                 let delta_data = &data[i..];
 
                 let same = delta_data.iter()
@@ -95,6 +99,14 @@ mod tests {
         let device = wait_for_device().await?;
         println!("Device {device}");
 
+        Ok(())
+    }
+
+    #[tokio::test]
+    #[ignore = "Manual test"]
+    async fn test_partition() -> anyhow::Result<()> {
+        let partitions = get_partitions("/org/freedesktop/UDisks2/block_devices/sda").await?;
+        println!("Partitions {partitions:?}");
         Ok(())
     }
 }
