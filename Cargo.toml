@@ -1,6 +1,6 @@
 [package]
 name = "raw-import"
-version = "0.1.2"
+version = "0.1.3"
 edition = "2024"
 authors = [
     "Kenneth Hedman <raw-import@vitberget.se>"

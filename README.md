@@ -23,6 +23,4 @@ filename = "{yyyy}-{MM}-{dd} {HH}:{mm}:{ss} {seq} {filename}.{extension}"
 
 ```bash
 raw-import --help
-
 ```
-

@@ -9,9 +9,10 @@
     - [ ] Show file copy speed
     - [ ] Estimate time remaining
 - [x] Select a license
-- [ ] Wait for devices and auto-import ?
-    - [ ] Listen for changes. <https://github.com/Smithay/udev-rs/blob/master/examples/monitor.rs>
-    - [ ] Mount
-    - [ ] Umount
-    - [ ] Message
+- [x] Wait for devices and auto-import ?
+    - [x] Listen for changes. <https://github.com/Smithay/udev-rs/blob/master/examples/monitor.rs>
+    - [x] Mount
+    - [x] Umount
+    - [x] Message
 - [x] Publish on Github ... or what?
+- [ ] Create Systemd service file

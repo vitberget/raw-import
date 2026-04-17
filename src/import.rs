@@ -1,5 +1,5 @@
 use anyhow::ensure;
-use log::debug;
+use log::{debug, info, error};
 
 use crate::disk_actions::{copy_file, create_target_paths};
 use crate::exif::{enhance_with_exif, DirEntryWithExif};
@@ -12,6 +12,7 @@ pub(crate) fn import_files(from_path: Option<String>, args: &RawImportArgs, sett
     rexiv2::initialize()?;
     debug!("Running with settings {:?}", settings);
 
+    info!("Searching for raw files");
     let mut raw_files: Vec<DirEntryWithExif> = get_matching_files(from_path, settings)?.into_iter()
         .filter_map(|entry| enhance_with_exif(entry).ok())
         .collect();
@@ -24,9 +25,11 @@ pub(crate) fn import_files(from_path: Option<String>, args: &RawImportArgs, sett
         .collect();
 
     let total_file_count: usize = files.len();
-    let total_file_size: u64 = files.iter().map(|entry| entry.entry.size).sum();
+    let total_file_size: u64 = files.iter()
+        .map(|entry| entry.entry.size)
+        .sum();
 
-    debug!("total count {total_file_count}, size {total_file_size}");
+    info!("Found {total_file_count} raw files, size {total_file_size}");
 
     ensure!(total_file_count > 0, "No files to be imported found");
 
@@ -41,12 +44,27 @@ pub(crate) fn import_files(from_path: Option<String>, args: &RawImportArgs, sett
 
 pub(crate) async fn wait_and_import(args: &RawImportArgs, settings: &Settings) -> anyhow::Result<()> {
     loop {
-        let device = wait_for_device().await?;
-
-        for partition in get_partitions(&device).await? {
-            let path = mount(&partition).await?;
-            import_files(Some(path), args, settings)?;
-            unmount(&partition).await?;
+         match wait_for_device().await {
+            Ok(device) => if let Err(err) = import_device(&device, args, settings).await {
+                error!("Error importing from device {device} {err}")
+            }
+            Err(err) => error!("Error waiting for device {err}"),
         }
     }
+}
+
+async fn import_device(device: &String, args: &RawImportArgs, settings: &Settings) -> anyhow::Result<()> {
+    info!("Found {device}");
+
+    for partition in get_partitions(device).await? {
+        let path = mount(&partition).await?;
+        info!("Mounted {partition} on {path}");
+
+        import_files(Some(path), args, settings)?;
+
+        unmount(&partition).await?;
+        info!("Unmounted {partition}");
+    }
+
+    Ok(())
 }
