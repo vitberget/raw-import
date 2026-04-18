@@ -107,7 +107,7 @@ mod tests {
     #[tokio::test]
     #[ignore = "Manual test"]
     async fn test_mount() -> anyhow::Result<()> {
-        let path = mount("sdc1").await?;
+        let path = mount("/org/freedesktop/UDisks2/block_devices/sda1").await?;
         println!("Path is {path}");
         Ok(())
     }
@@ -115,7 +115,7 @@ mod tests {
     #[tokio::test]
     #[ignore = "Manual test"]
     async fn test_unmount() -> anyhow::Result<()> {
-        unmount("sdc1").await?;
+        unmount("/org/freedesktop/UDisks2/block_devices/sda1").await?;
         Ok(())
     }
 
