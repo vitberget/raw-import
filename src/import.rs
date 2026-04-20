@@ -10,9 +10,10 @@ use crate::udisks2::{get_partitions, mount, unmount, wait_for_device};
 
 pub(crate) fn import_files(from_path: Option<String>, args: &RawImportArgs, settings: &Settings) -> anyhow::Result<()> {
     rexiv2::initialize()?;
-    debug!("Running with settings {:?}", settings);
 
+    debug!("Running with settings {:?}", settings);
     info!("Searching for raw files");
+
     let mut raw_files: Vec<DirEntryWithExif> = get_matching_files(from_path, settings)?.into_iter()
         .filter_map(|entry| enhance_with_exif(entry).ok())
         .collect();

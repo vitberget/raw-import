@@ -1,9 +1,7 @@
 use std::fs::DirEntry;
 use rexiv2::Metadata;
 
-use crate::exif::date_time::get_date_time;
-
-use self::date_time::ExifDateTime;
+use crate::exif::date_time::{ExifDateTime, get_date_time};
 
 pub(crate) mod date_time;
 

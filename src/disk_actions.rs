@@ -32,16 +32,16 @@ pub(crate) fn create_target_paths(target_paths: Vec<&String>, args: &RawImportAr
 pub(crate) fn copy_file(entry: &EntryWithRename, settings: &Settings, args: &RawImportArgs, total_file_count: &usize) {
     let source_file = entry.entry.entry.path();
     let percentage = (100_f32 * entry.index as f32) / *total_file_count as f32;
-    info!("Copying: {} -> {}/{}    ({}/{}  {:.1}%)", 
-        source_file.to_str().unwrap(), 
-        entry.path, 
-        entry.new_name,
-        entry.index,
-        total_file_count,
-        percentage
-        );
+    info!("Copying: {source} -> {target_path}/{target_name}    ({index}/{total_file_count}  {percentage:.1}%)", 
+        source = source_file.to_str().unwrap(), 
+        target_path = entry.path, 
+        target_name = entry.new_name,
+        index = entry.index,
+    );
+
     let dir = Path::new(&entry.path);
     let target_file = dir.join(Path::new(&entry.new_name));
+
     match (target_file.exists(), &settings.output.duplicates)  {
         (true, DuplicateAction::Ignore) => info!("  {} exists, not copying (ignoring)", target_file.to_str().unwrap()),
         (true, DuplicateAction::AlterName) => todo!("AlterName not yet implemented"),
@@ -59,6 +59,6 @@ fn actually_copy_file(source_file: PathBuf, target_file: PathBuf, args: &RawImpo
     if args.dry_run == Some(true) {
         info!("  Dry run, no action");
     } else if let Err(error) = fs::copy(source_file, target_file) {
-        info!("  Error: {}", error);
+        info!("  Error: {error}");
     }
 }
