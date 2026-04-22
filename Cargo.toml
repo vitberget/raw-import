@@ -18,4 +18,3 @@ tokio = { version = "1.51.1", features = ["fs", "macros", "rt", "rt-multi-thread
 tokio-macros = "2.7.0"
 udisks2 = "0.3.1"
 xdg = "3.0.0"
-zvariant = "=5.9.0"
