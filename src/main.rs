@@ -21,13 +21,17 @@ async fn main() -> anyhow::Result<()>{
     let args = RawImportArgs::parse();
     let _log_guard = setup_logging(&args);
 
-    info!("RAW importer v{APP_VERSION}");
-
     let settings = get_settings()?;
 
     match args.command {
-        RawImportCommand::Import { ref from_path } => import_files(from_path.clone(), &args, &settings),
-        RawImportCommand::WaitForDevice => wait_and_import(&args, &settings).await,
+        RawImportCommand::Import { ref from_path } => {
+            info!("RAW importer v{APP_VERSION}");
+            import_files(from_path.clone(), &args, &settings)
+        },
+        RawImportCommand::WaitForDevice => {
+            info!("RAW importer v{APP_VERSION}");
+            wait_and_import(&args, &settings).await
+        },
         RawImportCommand::ShowConfiguration => show_config(&settings),
         RawImportCommand::DefaultConfiguration => show_default_config(),
         RawImportCommand::Completion { shell } => print_completions(shell)

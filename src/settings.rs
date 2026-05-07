@@ -9,11 +9,6 @@ use config::{Config, File, FileFormat, ConfigBuilder};
 use log::{debug, info};
 
 #[derive(Parser, Debug)]
-#[command(author, version, about)]
-/// Utility to import raw files from one location, such as a memory card, 
-/// to another location, such as a hdd/sdd.
-///
-/// Source will be available at: https://github.com/vitberget/raw-importer
 pub(crate) struct RawImportArgs {
     #[command(subcommand)]
     pub(crate) command: RawImportCommand,
