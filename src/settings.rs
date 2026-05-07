@@ -1,10 +1,11 @@
 use std::collections::HashSet;
-use std::fs;
+use std::{fs, io};
 
 use anyhow::format_err;
-use clap::{Parser, Subcommand, ValueEnum};
-use config::{Config, File, FileFormat, ConfigBuilder};
+use clap::{CommandFactory as _, Parser, Subcommand, ValueEnum};
+use clap_complete::{Generator, Shell, generate};
 use config::builder::DefaultState;
+use config::{Config, File, FileFormat, ConfigBuilder};
 use log::{debug, info};
 
 #[derive(Parser, Debug)]
@@ -39,7 +40,10 @@ pub(crate) enum RawImportCommand {
     DefaultConfiguration,
 
     /// Wait for device being inserted, mount, import, unmount, repeat
-    WaitForDevice
+    WaitForDevice,
+
+    /// Shell completion
+    Completion { shell: Shell }
 }
 
 #[derive(ValueEnum,Clone,Debug)]
@@ -166,5 +170,12 @@ pub(crate) fn show_config(settings: &Settings) -> anyhow::Result<()> {
 pub(crate) fn show_default_config() -> anyhow::Result<()> {
     info!("=== Default settings ===");
     info!("{}", include_str!("../resources/default_properties.toml"));
+    Ok(())
+}
+
+pub(crate) fn print_completions<G: Generator>(generator: G) -> anyhow::Result<()> {
+    let mut cmd = RawImportArgs::command();
+    let name = cmd.get_name().to_string();
+    generate(generator, &mut cmd, name, &mut io::stdout());
     Ok(())
 }
