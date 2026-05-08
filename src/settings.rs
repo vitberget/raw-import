@@ -168,9 +168,11 @@ pub(crate) fn show_default_config() -> anyhow::Result<()> {
     Ok(())
 }
 
-pub(crate) fn print_completions<G: Generator>(generator: G) -> anyhow::Result<()> {
-    let mut cmd = RawImportArgs::command();
-    let name = cmd.get_name().to_string();
-    generate(generator, &mut cmd, name, &mut io::stdout());
-    Ok(())
+impl RawImportArgs {
+    pub(crate) fn print_completions<G: Generator>(generator: G) -> anyhow::Result<()> {
+        let mut cmd = Self::command();
+        let name = cmd.get_name().to_string();
+        generate(generator, &mut cmd, name, &mut io::stdout());
+        Ok(())
+    }
 }
