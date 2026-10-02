@@ -2,6 +2,7 @@ use std::collections::HashMap;
 
 use anyhow::Context;
 use futures_lite::StreamExt;
+use log::debug;
 
 pub async fn mount(device: &str) -> anyhow::Result<String> {
     let mount = udisks2::Client::new().await?
@@ -26,6 +27,26 @@ pub async fn get_partitions(device: &str) -> anyhow::Result<Vec<String>> {
         .partitions().await.context("Failed to get partitions for {device}")?;
 
     Ok(partitions.iter().map(|p| p.to_string()).collect())
+}
+
+pub async fn print_udisk_status() -> anyhow::Result<()> {
+    let client = udisks2::Client::new().await?;
+    debug!("Current drives:");
+    for object in client
+        .object_manager()
+        .get_managed_objects()
+        .await?.into_keys()
+        .filter_map(|object_path| client.object(object_path).ok())
+    {
+        let Ok(drive) = object.drive().await else { continue; };
+
+        debug!( "  {model}: {size}",
+            model = drive.model().await?,
+            size = client.size_for_display(drive.size().await?, false, false)
+        );
+    }
+
+    Ok(())
 }
 
 /// Returns something like "/org/freedesktop/UDisks2/block_devices/sda"

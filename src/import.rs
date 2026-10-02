@@ -6,7 +6,7 @@ use crate::exif::{enhance_with_exif, DirEntryWithExif};
 use crate::files::get_matching_files;
 use crate::rename::{rename_entry, EntryWithRename};
 use crate::settings::{RawImportArgs, Settings};
-use crate::udisks2::{get_partitions, mount, unmount, wait_for_device};
+use crate::udisks2::{get_partitions, print_udisk_status, mount, unmount, wait_for_device};
 
 pub(crate) fn import_files(from_path: Option<String>, args: &RawImportArgs, settings: &Settings) -> anyhow::Result<()> {
     rexiv2::initialize()?;
@@ -44,6 +44,7 @@ pub(crate) fn import_files(from_path: Option<String>, args: &RawImportArgs, sett
 }
 
 pub(crate) async fn wait_and_import(args: &RawImportArgs, settings: &Settings) -> anyhow::Result<()> {
+    let _ = print_udisk_status().await;
     loop {
          match wait_for_device().await {
             Ok(device) => if let Err(err) = import_device(&device, args, settings).await {
@@ -53,6 +54,7 @@ pub(crate) async fn wait_and_import(args: &RawImportArgs, settings: &Settings) -
         }
     }
 }
+
 
 async fn import_device(device: &String, args: &RawImportArgs, settings: &Settings) -> anyhow::Result<()> {
     info!("Found {device}");
