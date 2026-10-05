@@ -9,6 +9,7 @@ use config::{Config, File, FileFormat, ConfigBuilder};
 use log::{debug, info};
 
 #[derive(Parser, Debug)]
+#[command(version)]
 pub(crate) struct RawImportArgs {
     #[command(subcommand)]
     pub(crate) command: RawImportCommand,
@@ -147,8 +148,6 @@ fn get_xdg_config_file_content() -> Option<(String, String)> {
 pub(crate) fn show_config(settings: &Settings) -> anyhow::Result<()> {
     info!("Running with settings:");
     info!("{settings:?}");
-    info!("");
-    show_default_config()?;
     info!("");
 
     match get_xdg_config_file_content() {
