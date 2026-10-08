@@ -24,11 +24,11 @@ async fn main() -> anyhow::Result<()>{
     let settings = get_settings()?;
 
     match args.command {
-        RawImportCommand::Import { ref from_path } => {
+        RawImportCommand::FromPath { ref from_path } => {
             info!("RAW importer v{APP_VERSION}");
-            import_files(from_path.clone(), &args, &settings)
+            import_files(&from_path, &args, &settings)
         },
-        RawImportCommand::WaitForDevice => {
+        RawImportCommand::WaitForCard => {
             info!("RAW importer v{APP_VERSION}");
             wait_and_import(&args, &settings).await
         },

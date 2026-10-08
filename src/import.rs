@@ -8,7 +8,7 @@ use crate::rename::{rename_entry, EntryWithRename};
 use crate::settings::{RawImportArgs, Settings};
 use crate::udisks2::{get_partitions, print_udisk_status, mount, unmount, wait_for_device};
 
-pub(crate) fn import_files(from_path: Option<String>, args: &RawImportArgs, settings: &Settings) -> anyhow::Result<()> {
+pub(crate) fn import_files(from_path: &String, args: &RawImportArgs, settings: &Settings) -> anyhow::Result<()> {
     rexiv2::initialize()?;
 
     debug!("Running with settings {:?}", settings);
@@ -63,7 +63,7 @@ async fn import_device(device: &String, args: &RawImportArgs, settings: &Setting
         let path = mount(&partition).await?;
         info!("Mounted {partition} on {path}");
 
-        import_files(Some(path), args, settings)?;
+        import_files(&path, args, settings)?;
 
         unmount(&partition).await?;
         info!("Unmounted {partition}");

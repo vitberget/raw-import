@@ -1,5 +1,4 @@
 [input]
-path = "./"
 file_types = ["cr2", "cr3", "raf"]
 recursive = true
 

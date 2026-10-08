@@ -23,21 +23,16 @@ pub(crate) struct RawImportArgs {
 
 #[derive(Subcommand, Debug)]
 pub(crate) enum RawImportCommand {
-    /// Import raw files
-    Import {  
-        #[arg(short, long)]
-        from_path: Option<String> 
-    },
+    /// Import raw files from a path
+    FromPath {  from_path: String },
+
+    /// Wait for a memory card/drive being inserted, mount, import, unmount, repeat
+    WaitForCard,
 
     /// Show information about configuration from all sources
     ShowConfiguration,
-
     /// Show default configuration
     DefaultConfiguration,
-
-    /// Wait for device being inserted, mount, import, unmount, repeat
-    WaitForDevice,
-
     /// Shell completion
     Completion { shell: Shell }
 }
@@ -57,7 +52,6 @@ pub(crate) struct Settings {
 
 #[derive(Debug)]
 pub(crate) struct InputSettings {
-    pub(crate) path: String, 
     pub(crate) file_types: HashSet<String>,
     pub(crate) recursive: bool
 }
@@ -102,7 +96,6 @@ pub(crate) fn get_settings() -> anyhow::Result<Settings> {
 
     Ok(Settings {
         input: InputSettings { 
-            path: config.get_string("input.path")?,
             file_types,
             recursive: config.get_bool("input.recursive")?,
         },

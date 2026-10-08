@@ -3,14 +3,8 @@ use std::path::Path;
 
 use crate::settings::Settings;
 
-pub(crate) fn get_matching_files(from_path: Option<String>, settings: &Settings) -> anyhow::Result<Vec<DirEntry>>{
-    let text: String = match from_path {
-        Some(path) => path.clone(),
-        None => settings.input.path.clone()
-    };
-
-    let the_path = Path::new(&text);
-
+pub(crate) fn get_matching_files(from_path: &String, settings: &Settings) -> anyhow::Result<Vec<DirEntry>>{
+    let the_path = Path::new(from_path);
     get_matching_files_from_path(the_path, settings)
 }
 
