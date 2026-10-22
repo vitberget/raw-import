@@ -1,7 +1,7 @@
 use clap::Parser;
 use log::info;
 
-use crate::import::{import_files, wait_and_import};
+use crate::import::{do_card, import_files, wait_and_import};
 use crate::logging::setup_logging;
 use crate::settings::{RawImportArgs, RawImportCommand, get_settings, show_config, show_default_config};
 
@@ -26,12 +26,13 @@ async fn main() -> anyhow::Result<()>{
     match args.command {
         RawImportCommand::FromPath { ref from_path } => {
             info!("RAW importer v{APP_VERSION}");
-            import_files(&from_path, &args, &settings)
+            import_files(from_path, &args, &settings)
         },
         RawImportCommand::WaitForCard => {
             info!("RAW importer v{APP_VERSION}");
             wait_and_import(&args, &settings).await
         },
+        RawImportCommand::Card => do_card(&args, &settings).await,
         RawImportCommand::ShowConfiguration => show_config(&settings),
         RawImportCommand::DefaultConfiguration => show_default_config(),
         RawImportCommand::Completion { shell } => RawImportArgs::print_completions(shell)

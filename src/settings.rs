@@ -29,6 +29,9 @@ pub(crate) enum RawImportCommand {
     /// Wait for a memory card/drive being inserted, mount, import, unmount, repeat
     WaitForCard,
 
+    /// Select from a list of cards/drives and import the images
+    Card,
+
     /// Show information about configuration from all sources
     ShowConfiguration,
     /// Show default configuration

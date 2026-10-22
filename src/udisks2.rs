@@ -1,8 +1,9 @@
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
-use anyhow::Context;
+use anyhow::{Context, bail};
 use futures_lite::StreamExt;
 use log::debug;
+use udisks2::{partition, zbus::OwnedObjectPath};
 
 pub async fn mount(device: &str) -> anyhow::Result<String> {
     let mount = udisks2::Client::new().await?
@@ -20,14 +21,6 @@ pub async fn unmount(device: &str) -> anyhow::Result<()> {
     Ok(())
 }
 
-pub async fn get_partitions(device: &str) -> anyhow::Result<Vec<String>> {
-    let partitions = udisks2::Client::new().await?
-        .object(device).context("No {device} device found")?
-        .partition_table().await.context("Failed to get partition_table for {device}")?
-        .partitions().await.context("Failed to get partitions for {device}")?;
-
-    Ok(partitions.iter().map(|p| p.to_string()).collect())
-}
 
 pub async fn print_udisk_status() -> anyhow::Result<()> {
     let client = udisks2::Client::new().await?;
@@ -50,7 +43,7 @@ pub async fn print_udisk_status() -> anyhow::Result<()> {
 }
 
 /// Returns something like "/org/freedesktop/UDisks2/block_devices/sda"
-pub async fn wait_for_device() -> anyhow::Result<String> {
+pub async fn wait_for_card() -> anyhow::Result<String> {
     let mut stream = udisks2::Client::new().await?
         .object_manager()
         .receive_interfaces_added().await?;
@@ -88,6 +81,66 @@ pub async fn wait_for_device() -> anyhow::Result<String> {
             }
         }
     }
+}
+
+#[derive(Debug)]
+pub struct Card {
+    pub info: String,
+    pub partitions: Vec<String>
+}
+
+pub async fn get_cards() -> anyhow::Result<Vec<Card>> {
+    let mut cards: Vec<Card> = vec![];
+
+    let client = udisks2::Client::new().await?;
+
+    if let Ok(drives) = client.manager().get_drives(HashMap::new()).await {
+        for drive_path in drives {
+            if let Ok(partitions) = get_partitions_for_thing(&drive_path).await {
+                let info = get_drive_info(&drive_path).await?;
+                cards.push(Card { info, partitions })
+            }
+        }
+    }
+
+    Ok(cards)
+}
+
+async fn get_drive_info(drive_path: &OwnedObjectPath) -> anyhow::Result<String> {
+    let client = udisks2::Client::new().await?;
+
+    let object = client.object(drive_path.to_owned())?;
+    let info = client.object_info(&object).await;
+
+    Ok(format!("{name} {description}", 
+        name = info.name.unwrap_or("NoName".to_string()), 
+        description = info.description.unwrap_or("NoDescription".to_string())
+    ).to_string())
+}
+
+async fn get_partitions_for_thing(drive_path: &OwnedObjectPath) -> anyhow::Result<Vec<String>> {
+    let client = udisks2::Client::new().await?;
+
+    for block_device_path in client.manager().get_block_devices(HashMap::new()).await? {
+        let object = client.object(block_device_path)?;
+        if let Ok(block) = object.block().await
+        && let Ok(drive) = block.drive().await && drive == *drive_path
+        && let Ok(partition_table) = object.partition_table().await
+        && let Ok(partitions) = partition_table.partitions().await {
+            return Ok(partitions.iter().map(|p| p.to_string()).collect())
+        }
+    }
+
+    bail!("No partitions")
+}
+
+pub async fn get_partitions(device: &str) -> anyhow::Result<Vec<String>> {
+    let partitions = udisks2::Client::new().await?
+        .object(device).context("No {device} device found")?
+        .partition_table().await.context("Failed to get partition_table for {device}")?
+        .partitions().await.context("Failed to get partitions for {device}")?;
+
+    Ok(partitions.iter().map(|p| p.to_string()).collect())
 }
 
 fn is_digit(character: &u8) -> bool {
@@ -143,7 +196,7 @@ mod tests {
     #[tokio::test]
     #[ignore = "Manual test"]
     async fn test_wait_for_device() -> anyhow::Result<()> {
-        let device = wait_for_device().await?;
+        let device = wait_for_card().await?;
         println!("Device {device}");
 
         Ok(())
@@ -152,7 +205,7 @@ mod tests {
     #[tokio::test]
     #[ignore = "Manual test"]
     async fn test_partition() -> anyhow::Result<()> {
-        let partitions = get_partitions("/org/freedesktop/UDisks2/block_devices/sda").await?;
+        let partitions = get_partitions("/org/freedesktop/UDisks2/block_devices/sdc").await?;
         println!("Partitions {partitions:?}");
         Ok(())
     }

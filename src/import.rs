@@ -6,7 +6,7 @@ use crate::exif::{enhance_with_exif, DirEntryWithExif};
 use crate::files::get_matching_files;
 use crate::rename::{rename_entry, EntryWithRename};
 use crate::settings::{RawImportArgs, Settings};
-use crate::udisks2::{get_partitions, print_udisk_status, mount, unmount, wait_for_device};
+use crate::udisks2::{get_cards, get_partitions, mount, print_udisk_status, unmount, wait_for_card};
 
 pub(crate) fn import_files(from_path: &String, args: &RawImportArgs, settings: &Settings) -> anyhow::Result<()> {
     rexiv2::initialize()?;
@@ -46,13 +46,20 @@ pub(crate) fn import_files(from_path: &String, args: &RawImportArgs, settings: &
 pub(crate) async fn wait_and_import(args: &RawImportArgs, settings: &Settings) -> anyhow::Result<()> {
     let _ = print_udisk_status().await;
     loop {
-         match wait_for_device().await {
+         match wait_for_card().await {
             Ok(device) => if let Err(err) = import_device(&device, args, settings).await {
                 error!("Error importing from device {device} {err}")
             }
             Err(err) => error!("Error waiting for device {err}"),
         }
     }
+}
+
+pub(crate) async fn do_card(args: &RawImportArgs, settings: &Settings) -> anyhow::Result<()> {
+    let cards = get_cards().await?;
+    println!("{cards:?}");
+
+    Ok(())
 }
 
 
