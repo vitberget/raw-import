@@ -1,5 +1,8 @@
-use anyhow::ensure;
-use log::{debug, info, error};
+use std::collections::HashMap;
+use std::io;
+
+use anyhow::{bail, ensure};
+use log::{debug, error, info};
 
 use crate::disk_actions::{copy_file, create_target_paths};
 use crate::exif::{enhance_with_exif, DirEntryWithExif};
@@ -56,8 +59,42 @@ pub(crate) async fn wait_and_import(args: &RawImportArgs, settings: &Settings) -
 }
 
 pub(crate) async fn do_card(args: &RawImportArgs, settings: &Settings) -> anyhow::Result<()> {
+    let mut choices: HashMap<usize, String> = HashMap::new();
     let cards = get_cards().await?;
-    println!("{cards:?}");
+    let mut index: usize = 0;
+    for card in cards {
+        info!("Card {}", card.info);
+        for partition in card.partitions {
+            index += 1;
+            info!(" {index:>2}: {partition}");
+            choices.insert(index, partition);
+        }
+    }
+    info!("");
+    info!("Selection? ");
+
+    if index == 0 {
+        info!("No suitable card/partition available!");
+    } else {
+        let mut input_line: String = String::new();
+        match io::stdin().read_line(&mut input_line)  {
+            Ok(_) => {
+                match input_line.trim().parse::<usize>() {
+                    Ok(selection) => {
+                        match choices.get(&selection) {
+                            Some(partition) => {
+                                info!("Selected {selection}, {partition}");
+                                import_files(partition, args, settings)?;
+                            }
+                            None => { bail!("{selection} is not in range"); }
+                        }
+                    }
+                    Err(_) => bail!("Input is not a acceptable number")
+                }
+            }
+            Err(_) => bail!("Failed to read input!")
+        }
+    }
 
     Ok(())
 }

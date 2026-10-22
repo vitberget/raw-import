@@ -25,16 +25,23 @@ async fn main() -> anyhow::Result<()>{
 
     match args.command {
         RawImportCommand::FromPath { ref from_path } => {
-            info!("RAW importer v{APP_VERSION}");
+            do_header();
             import_files(from_path, &args, &settings)
         },
         RawImportCommand::WaitForCard => {
-            info!("RAW importer v{APP_VERSION}");
+            do_header();
             wait_and_import(&args, &settings).await
         },
-        RawImportCommand::Card => do_card(&args, &settings).await,
+        RawImportCommand::Card => {
+            do_header();
+            do_card(&args, &settings).await
+        },
         RawImportCommand::ShowConfiguration => show_config(&settings),
         RawImportCommand::DefaultConfiguration => show_default_config(),
         RawImportCommand::Completion { shell } => RawImportArgs::print_completions(shell)
     }
+}
+
+fn do_header() {
+    info!("RAW importer v{APP_VERSION}");
 }
