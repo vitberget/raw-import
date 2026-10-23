@@ -50,9 +50,7 @@ pub(crate) async fn wait_and_import(args: &RawImportArgs, settings: &Settings) -
     let _ = print_udisk_status().await;
     loop {
          match wait_for_card().await {
-            Ok(device) => if let Err(err) = import_device(&device, args, settings).await {
-                error!("Error importing from device {device} {err}")
-            }
+            Ok(device) =>  import_card(&device, args, settings).await?,
             Err(err) => error!("Error waiting for device {err}"),
         }
     }
@@ -83,8 +81,8 @@ pub(crate) async fn do_card(args: &RawImportArgs, settings: &Settings) -> anyhow
                     Ok(selection) => {
                         match choices.get(&selection) {
                             Some(partition) => {
-                                info!("Selected {selection}, {partition}");
-                                import_files(partition, args, settings)?;
+                                info!("{selection}: {partition} selected, proceeding to import files.");
+                                import_card(partition, args, settings).await?;
                             }
                             None => { bail!("{selection} is not in range"); }
                         }
@@ -100,8 +98,8 @@ pub(crate) async fn do_card(args: &RawImportArgs, settings: &Settings) -> anyhow
 }
 
 
-async fn import_device(device: &String, args: &RawImportArgs, settings: &Settings) -> anyhow::Result<()> {
-    info!("Found {device}");
+async fn import_card(device: &String, args: &RawImportArgs, settings: &Settings) -> anyhow::Result<()> {
+    info!("Importing from {device}");
 
     for partition in get_partitions(device).await? {
         let path = mount(&partition).await?;

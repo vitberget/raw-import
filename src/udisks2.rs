@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use anyhow::{Context, bail};
 use futures_lite::StreamExt;
-use log::debug;
+use log::{debug, info};
 use udisks2::zbus::OwnedObjectPath;
 
 pub async fn mount(device: &str) -> anyhow::Result<String> {
@@ -129,19 +129,22 @@ async fn get_drive_info(drive_path: &OwnedObjectPath) -> anyhow::Result<String> 
 }
 
 async fn get_partitions_for_thing(drive_path: &OwnedObjectPath) -> anyhow::Result<Vec<String>> {
+    info!("get {drive_path}");
     let client = udisks2::Client::new().await?;
 
     for block_device_path in client.manager().get_block_devices(HashMap::new()).await? {
         let object = client.object(block_device_path)?;
         if let Ok(block) = object.block().await
-        && Ok(drive_path) == block.drive().await.as_ref()
+        && Ok(drive_path) == block.drive().await.as_ref() 
         && let Ok(partition_table) = object.partition_table().await
-        && let Ok(partitions) = partition_table.partitions().await {
-            return Ok(partitions.iter().map(|p| p.to_string()).collect())
-        }
+        && let Ok(partitions) = partition_table.partitions().await 
+        {
+             info!("pt {:?}", block.inner().path());
+             return Ok(vec![block.inner().path().to_string()])
+         }
     }
 
-    bail!("No partitions")
+    bail!("Failed to get block device for {drive_path}")
 }
 
 pub async fn get_partitions(device: &str) -> anyhow::Result<Vec<String>> {
